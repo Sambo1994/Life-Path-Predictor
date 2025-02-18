@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Life Path Predictor</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Life Path Predictor</h1>
+        <div class="input-form">
+            <input type="text" id="name" placeholder="Enter your name">
+            <input type="date" id="dob">
+            <select id="sex">
+                <option value="M">Male</option>
+                <option value="F">Female</option>
+            </select>
+            <button onclick="predictLife()">Predict My Life</button>
+        </div>
+        <div id="result" class="result-container"></div>
+        <footer>Developed by Sambo Selvaraj</footer>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
