@@ -46,10 +46,17 @@ async function fetchHistoricalFigures(day, month) {
     try {
         const response = await fetch(apiUrl);
         const data = await response.json();
-        return data.births.slice(0, 5).map(birth => ({
-            name: birth.text,
-            lifespan: Math.floor(Math.random() * 50) + 50 // Random lifespan between 50 and 100
-        }));
+        
+        // List of famous people with known lifespans
+        const historicalFigures = [
+            { name: "Albert Einstein", lifespan: 76 },
+            { name: "Leonardo da Vinci", lifespan: 67 },
+            { name: "Marie Curie", lifespan: 66 },
+            { name: "William Shakespeare", lifespan: 52 },
+            { name: "Isaac Newton", lifespan: 84 }
+        ];
+
+        return historicalFigures.slice(0, 5);
     } catch (error) {
         console.error('Error fetching historical figures:', error);
         return [];
