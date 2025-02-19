@@ -10,7 +10,7 @@ function predictLife() {
 
     // Estimate lifespan based on historical life expectancy
     const lifeExpectancy = getLifeExpectancy(dob.getFullYear(), sex);
-    const deathYear = dob.getFullYear() + lifeExpectancy;
+    const deathYear = dob.getFullYear() + lifeExpectancy - (Math.floor(Math.random() * 11) + 10);
     const deathMonth = Math.floor(Math.random() * 12) + 1;
     const deathDay = Math.floor(Math.random() * 28) + 1;
 
