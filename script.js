@@ -8,17 +8,9 @@ function predictLife() {
         return;
     }
 
-    // Convert date components to binary and sum them
-    const dayBinary = dob.getDate().toString(2);
-    const monthBinary = (dob.getMonth() + 1).toString(2);
-    const yearBinary = dob.getFullYear().toString(2);
-    const binarySum = parseInt(dayBinary, 2) + parseInt(monthBinary, 2) + parseInt(yearBinary, 2);
-
-    // Simplify to a two-digit number
-    const predictedLifespan = binarySum % 100;
-
-    // Generate a random death date based on the predicted lifespan
-    const deathYear = dob.getFullYear() + predictedLifespan;
+    // Estimate lifespan based on historical life expectancy
+    const lifeExpectancy = getLifeExpectancy(dob.getFullYear(), sex);
+    const deathYear = dob.getFullYear() + lifeExpectancy;
     const deathMonth = Math.floor(Math.random() * 12) + 1;
     const deathDay = Math.floor(Math.random() * 28) + 1;
 
@@ -29,7 +21,7 @@ function predictLife() {
             const resultDiv = document.getElementById('result');
             resultDiv.innerHTML = `
                 <h2>Life Prediction for ${name}</h2>
-                <p>Predicted Lifespan: ${predictedLifespan} years</p>
+                <p>Estimated Lifespan: ${lifeExpectancy} years</p>
                 <p>Predicted Date of Passing: ${deathMonth}/${deathDay}/${deathYear}</p>
                 <h3>Life Path Comparison</h3>
                 ${generateLifeComparison(figures)}
@@ -41,13 +33,34 @@ function predictLife() {
         });
 }
 
+function getLifeExpectancy(birthYear, sex) {
+    const baseLifeExpectancy = {
+        1900: { male: 47, female: 50 },
+        1950: { male: 66, female: 72 },
+        2000: { male: 74, female: 80 },
+        2025: { male: 78, female: 83 }
+    };
+
+    const years = Object.keys(baseLifeExpectancy).map(Number).sort((a, b) => a - b);
+    for (let i = 0; i < years.length - 1; i++) {
+        if (years[i] <= birthYear && birthYear < years[i + 1]) {
+            const maleStart = baseLifeExpectancy[years[i]].male;
+            const femaleStart = baseLifeExpectancy[years[i]].female;
+            const maleEnd = baseLifeExpectancy[years[i + 1]].male;
+            const femaleEnd = baseLifeExpectancy[years[i + 1]].female;
+            
+            const interpolatedMale = maleStart + ((birthYear - years[i]) / (years[i + 1] - years[i])) * (maleEnd - maleStart);
+            const interpolatedFemale = femaleStart + ((birthYear - years[i]) / (years[i + 1] - years[i])) * (femaleEnd - femaleStart);
+            
+            return sex === 'male' ? Math.round(interpolatedMale) : Math.round(interpolatedFemale);
+        }
+    }
+    return baseLifeExpectancy[years[years.length - 1]][sex];
+}
+
 async function fetchHistoricalFigures(day, month) {
-    const apiUrl = `https://api.wikimedia.org/feed/v1/wikipedia/en/onthisday/births/${month}/${day}`;
     try {
-        const response = await fetch(apiUrl);
-        const data = await response.json();
-        
-        // List of famous people with known lifespans
+        // Simulated famous people list
         const historicalFigures = [
             { name: "Albert Einstein", lifespan: 76 },
             { name: "Leonardo da Vinci", lifespan: 67 },
@@ -55,7 +68,6 @@ async function fetchHistoricalFigures(day, month) {
             { name: "William Shakespeare", lifespan: 52 },
             { name: "Isaac Newton", lifespan: 84 }
         ];
-
         return historicalFigures.slice(0, 5);
     } catch (error) {
         console.error('Error fetching historical figures:', error);
@@ -77,11 +89,11 @@ function generateLifeCode() {
     for (let i = 0; i < 5; i++) {
         const randomValue = Math.random();
         if (randomValue > 0.66) {
-            code.push(1); // Positive
+            code.push(1);
         } else if (randomValue > 0.33) {
-            code.push(0); // Negative
+            code.push(0);
         } else {
-            code.push(Math.round(Math.random())); // Neutral (randomly 0 or 1)
+            code.push(Math.round(Math.random()));
         }
     }
     return code.join('');
