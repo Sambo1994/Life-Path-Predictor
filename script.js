@@ -1,7 +1,7 @@
 function predictLife() {
     const name = document.getElementById('name').value;
     const dob = new Date(document.getElementById('dob').value);
-    const sex = document.getElementById('sex').value;
+    const sex = document.getElementById('sex').value.toLowerCase();
 
     if (!name || isNaN(dob.getTime())) {
         alert("Please enter a valid name and date of birth.");
@@ -21,11 +21,11 @@ function predictLife() {
             const resultDiv = document.getElementById('result');
             resultDiv.innerHTML = `
                 <h2>Life Prediction for ${name}</h2>
-                <p>Estimated Lifespan: ${lifeExpectancy} years</p>
-                <p>Predicted Date of Passing: ${deathMonth}/${deathDay}/${deathYear}</p>
+                <p><strong>Estimated Lifespan:</strong> ${lifeExpectancy} years</p>
+                <p><strong>Predicted Date of Passing:</strong> ${deathMonth}/${deathDay}/${deathYear}</p>
                 <h3>Life Path Comparison</h3>
                 ${generateLifeComparison(figures)}
-                <p>Life Code: ${generateLifeCode()}</p>
+                <p><strong>Life Code:</strong> ${generateLifeCode()}</p>
             `;
         })
         .catch(error => {
@@ -48,10 +48,10 @@ function getLifeExpectancy(birthYear, sex) {
             const femaleStart = baseLifeExpectancy[years[i]].female;
             const maleEnd = baseLifeExpectancy[years[i + 1]].male;
             const femaleEnd = baseLifeExpectancy[years[i + 1]].female;
-            
+
             const interpolatedMale = maleStart + ((birthYear - years[i]) / (years[i + 1] - years[i])) * (maleEnd - maleStart);
             const interpolatedFemale = femaleStart + ((birthYear - years[i]) / (years[i + 1] - years[i])) * (femaleEnd - femaleStart);
-            
+
             return sex === 'male' ? Math.round(interpolatedMale) : Math.round(interpolatedFemale);
         }
     }
@@ -60,7 +60,7 @@ function getLifeExpectancy(birthYear, sex) {
 
 async function fetchHistoricalFigures(day, month) {
     try {
-        // Simulated famous people list
+        // Simulated famous people list (in real use case, fetch from API)
         const historicalFigures = [
             { name: "Albert Einstein", lifespan: 76 },
             { name: "Leonardo da Vinci", lifespan: 67 },
@@ -88,13 +88,7 @@ function generateLifeCode() {
     const code = [];
     for (let i = 0; i < 5; i++) {
         const randomValue = Math.random();
-        if (randomValue > 0.66) {
-            code.push(1);
-        } else if (randomValue > 0.33) {
-            code.push(0);
-        } else {
-            code.push(Math.round(Math.random()));
-        }
+        code.push(randomValue > 0.5 ? 1 : 0);
     }
     return code.join('');
 }
