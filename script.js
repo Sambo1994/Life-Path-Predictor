@@ -35,10 +35,10 @@ function predictLife() {
 
 function getLifeExpectancy(birthYear, sex) {
     const baseLifeExpectancy = {
-        1900: { male: 73, female: 80 },
-        1950: { male: 61, female: 73 },
-        2000: { male: 54, female: 60 },
-        2025: { male: 41, female: 53 }
+        1900: { male: 71, female: 74 },
+        1950: { male: 52, female: 96 },
+        2000: { male: 60, female: 104 },
+        2025: { male: 64, female: 107 }
     };
 
     const years = Object.keys(baseLifeExpectancy).map(Number).sort((a, b) => a - b);
