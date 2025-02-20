@@ -8,24 +8,31 @@ function predictLife() {
         return;
     }
 
+    const birthYear = dob.getFullYear();
+    const birthMonth = dob.getMonth() + 1;
+    const birthDay = dob.getDate();
+
     // Estimate lifespan based on historical life expectancy
-    const lifeExpectancy = getLifeExpectancy(dob.getFullYear(), sex);
-    const deathYear = dob.getFullYear() + lifeExpectancy;
-    const deathMonth = Math.floor(Math.random() * 12) + 1;
-    const deathDay = Math.floor(Math.random() * 28) + 1;
+    const lifeExpectancy = getLifeExpectancy(birthYear, sex);
+
+    // Introduce more randomness in the death prediction
+    const variation = (birthYear % 10) - (birthDay % 5); // Add slight variation based on birth date
+    const deathYear = birthYear + lifeExpectancy + variation;
+    const deathMonth = ((birthMonth + birthDay) % 12) + 1; // More varied month
+    const deathDay = ((birthDay * 3) % 28) + 1; // More varied day
 
     // Fetch historical figures born on the same date
-    fetchHistoricalFigures(dob.getDate(), dob.getMonth() + 1)
+    fetchHistoricalFigures(birthDay, birthMonth, birthYear)
         .then(figures => {
             // Display the results
             const resultDiv = document.getElementById('result');
             resultDiv.innerHTML = `
                 <h2>Life Prediction for ${name}</h2>
-                <p>Estimated Lifespan: ${lifeExpectancy} years</p>
+                <p>Estimated Lifespan: ${lifeExpectancy + variation} years</p>
                 <p>Predicted Date of Passing: ${deathMonth}/${deathDay}/${deathYear}</p>
                 <h3>Life Path Comparison</h3>
                 ${generateLifeComparison(figures)}
-                <p>Life Code: ${generateLifeCode()}</p>
+                <p>Life Code: ${generateLifeCode(birthYear, birthMonth, birthDay)}</p>
             `;
         })
         .catch(error => {
@@ -58,17 +65,21 @@ function getLifeExpectancy(birthYear, sex) {
     return baseLifeExpectancy[years[years.length - 1]][sex];
 }
 
-async function fetchHistoricalFigures(day, month) {
+async function fetchHistoricalFigures(day, month, year) {
     try {
-        // Simulated famous people list
         const historicalFigures = [
-            { name: "Albert Einstein", lifespan: 76 },
-            { name: "Leonardo da Vinci", lifespan: 67 },
-            { name: "Marie Curie", lifespan: 66 },
-            { name: "William Shakespeare", lifespan: 52 },
-            { name: "Isaac Newton", lifespan: 84 }
+            { name: "Albert Einstein", lifespan: 76, born: 1879 },
+            { name: "Leonardo da Vinci", lifespan: 67, born: 1452 },
+            { name: "Marie Curie", lifespan: 66, born: 1867 },
+            { name: "William Shakespeare", lifespan: 52, born: 1564 },
+            { name: "Isaac Newton", lifespan: 84, born: 1643 },
+            { name: "Nikola Tesla", lifespan: 86, born: 1856 },
+            { name: "Ada Lovelace", lifespan: 36, born: 1815 },
+            { name: "Mahatma Gandhi", lifespan: 78, born: 1869 },
         ];
-        return historicalFigures.slice(0, 5);
+
+        // Filter figures based on birth century for more relevant comparison
+        return historicalFigures.filter(fig => Math.abs(fig.born - year) <= 100).slice(0, 5);
     } catch (error) {
         console.error('Error fetching historical figures:', error);
         return [];
@@ -84,16 +95,18 @@ function generateLifeComparison(figures) {
     return comparison;
 }
 
-function generateLifeCode() {
-    const code = [];
+function generateLifeCode(year, month, day) {
+    let code = [];
+    const seed = (year % 100) * month * day; // Unique seed for variation
+
     for (let i = 0; i < 5; i++) {
-        const randomValue = Math.random();
-        if (randomValue > 0.66) {
-            code.push(1);
-        } else if (randomValue > 0.33) {
+        const value = (seed * (i + 1)) % 3; // Ensures 3 different possible values
+        if (value === 0) {
             code.push(0);
+        } else if (value === 1) {
+            code.push(1);
         } else {
-            code.push(Math.round(Math.random()));
+            code.push(Math.round(Math.random())); // More dynamic randomness
         }
     }
     return code.join('');
