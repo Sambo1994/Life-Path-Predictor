@@ -35,26 +35,41 @@ function predictLife() {
 
 function getLifeExpectancy(birthYear, sex) {
     const baseLifeExpectancy = {
-        1900: { male: 80, female: 79 },
-        1950: { male: 77, female: 82 },
+        1900: { male: 46, female: 48 },
+        1950: { male: 60, female: 65 },
         2000: { male: 74, female: 79 },
-        2025: { male: 71, female: 82 }
+        2025: { male: 71, female: 82 } // Updated values for modern expectations
     };
 
     const years = Object.keys(baseLifeExpectancy).map(Number).sort((a, b) => a - b);
+    
+    // If birth year is before the earliest record, return the first available estimate
+    if (birthYear < years[0]) {
+        return baseLifeExpectancy[years[0]][sex];
+    }
+    
+    // If birth year is beyond the latest record, return the last available estimate
+    if (birthYear >= years[years.length - 1]) {
+        return baseLifeExpectancy[years[years.length - 1]][sex];
+    }
+
+    // Interpolate between the nearest known life expectancy values
     for (let i = 0; i < years.length - 1; i++) {
         if (years[i] <= birthYear && birthYear < years[i + 1]) {
             const maleStart = baseLifeExpectancy[years[i]].male;
             const femaleStart = baseLifeExpectancy[years[i]].female;
             const maleEnd = baseLifeExpectancy[years[i + 1]].male;
             const femaleEnd = baseLifeExpectancy[years[i + 1]].female;
-            
-            const interpolatedMale = maleStart + ((birthYear - years[i]) / (years[i + 1] - years[i])) * (maleEnd - maleStart);
-            const interpolatedFemale = femaleStart + ((birthYear - years[i]) / (years[i + 1] - years[i])) * (femaleEnd - femaleStart);
-            
+
+            const fraction = (birthYear - years[i]) / (years[i + 1] - years[i]);
+
+            const interpolatedMale = maleStart + fraction * (maleEnd - maleStart);
+            const interpolatedFemale = femaleStart + fraction * (femaleEnd - femaleStart);
+
             return sex === 'male' ? Math.round(interpolatedMale) : Math.round(interpolatedFemale);
         }
     }
+
     return baseLifeExpectancy[years[years.length - 1]][sex];
 }
 
