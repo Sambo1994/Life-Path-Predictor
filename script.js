@@ -35,7 +35,7 @@ function predictLife() {
 
 function getLifeExpectancy(birthYear, sex) {
     const baseLifeExpectancy = {
-        1900: { male: 73, female: 79 },
+        1900: { male: 67, female: 73 },
         1950: { male: 71, female: 83 },
         2000: { male: 74, female: 80 },
         2025: { male: 71, female: 83 }
