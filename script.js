@@ -1,5 +1,5 @@
 function predictLife() {
-    const name = document.getElementById('name').value;
+    const name = document.getElementById('name').value.trim();
     const dob = new Date(document.getElementById('dob').value);
     const sex = document.getElementById('sex').value;
 
@@ -12,19 +12,21 @@ function predictLife() {
     const birthMonth = dob.getMonth() + 1;
     const birthDay = dob.getDate();
 
+    // Generate a numeric value from name for added uniqueness
+    const nameValue = hashName(name);
+
     // Estimate lifespan based on historical life expectancy
     const lifeExpectancy = getLifeExpectancy(birthYear, sex);
 
-    // Introduce more randomness in the death prediction
-    const variation = (birthYear % 10) - (birthDay % 5); // Add slight variation based on birth date
+    // Introduce more randomness by combining name hash and DOB
+    const variation = ((birthYear + nameValue) % 10) - ((birthDay + nameValue) % 5);
     const deathYear = birthYear + lifeExpectancy + variation;
-    const deathMonth = ((birthMonth + birthDay) % 12) + 1; // More varied month
-    const deathDay = ((birthDay * 3) % 28) + 1; // More varied day
+    const deathMonth = ((birthMonth * nameValue) % 12) + 1;
+    const deathDay = ((birthDay + nameValue * 3) % 28) + 1;
 
     // Fetch historical figures born on the same date
     fetchHistoricalFigures(birthDay, birthMonth, birthYear)
         .then(figures => {
-            // Display the results
             const resultDiv = document.getElementById('result');
             resultDiv.innerHTML = `
                 <h2>Life Prediction for ${name}</h2>
@@ -32,12 +34,21 @@ function predictLife() {
                 <p>Predicted Date of Passing: ${deathMonth}/${deathDay}/${deathYear}</p>
                 <h3>Life Path Comparison</h3>
                 ${generateLifeComparison(figures)}
-                <p>Life Code: ${generateLifeCode(birthYear, birthMonth, birthDay)}</p>
+                <p>Life Code: ${generateLifeCode(birthYear, birthMonth, birthDay, nameValue)}</p>
             `;
         })
         .catch(error => {
             console.error('Error fetching historical figures:', error);
         });
+}
+
+// Generate a numeric value from name for uniqueness
+function hashName(name) {
+    let hash = 0;
+    for (let i = 0; i < name.length; i++) {
+        hash = (hash * 31 + name.charCodeAt(i)) % 1000; // Keep the number manageable
+    }
+    return hash;
 }
 
 function getLifeExpectancy(birthYear, sex) {
@@ -78,7 +89,6 @@ async function fetchHistoricalFigures(day, month, year) {
             { name: "Mahatma Gandhi", lifespan: 78, born: 1869 },
         ];
 
-        // Filter figures based on birth century for more relevant comparison
         return historicalFigures.filter(fig => Math.abs(fig.born - year) <= 100).slice(0, 5);
     } catch (error) {
         console.error('Error fetching historical figures:', error);
@@ -95,19 +105,13 @@ function generateLifeComparison(figures) {
     return comparison;
 }
 
-function generateLifeCode(year, month, day) {
+function generateLifeCode(year, month, day, nameValue) {
     let code = [];
-    const seed = (year % 100) * month * day; // Unique seed for variation
+    const seed = ((year % 100) * month * day + nameValue) % 1000;
 
     for (let i = 0; i < 5; i++) {
-        const value = (seed * (i + 1)) % 3; // Ensures 3 different possible values
-        if (value === 0) {
-            code.push(0);
-        } else if (value === 1) {
-            code.push(1);
-        } else {
-            code.push(Math.round(Math.random())); // More dynamic randomness
-        }
+        const value = (seed * (i + 1)) % 3;
+        code.push(value === 2 ? Math.round(Math.random()) : value);
     }
     return code.join('');
 }
