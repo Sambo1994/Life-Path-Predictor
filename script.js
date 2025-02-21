@@ -53,10 +53,10 @@ function hashName(name) {
 
 function getLifeExpectancy(birthYear, sex) {
     const baseLifeExpectancy = {
-        1900: { male: 74, female: 79 },
-        1950: { male: 71, female: 82 },
-        2000: { male: 74, female: 79 },
-        2050: { male: 71, female: 82 }
+        1900: { male: 79, female: 79 },
+        1950: { male: 82, female: 82 },
+        2000: { male: 79, female: 79 },
+        2050: { male: 82, female: 82 }
     };
 
     const years = Object.keys(baseLifeExpectancy).map(Number).sort((a, b) => a - b);
