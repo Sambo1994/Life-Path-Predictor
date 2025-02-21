@@ -15,13 +15,12 @@ function predictLife() {
     // Generate a numeric value from name for added uniqueness
     const nameValue = hashName(name);
 
-    // Estimate lifespan using updated life expectancy calculation
+    // Estimate lifespan based on historical life expectancy
     const lifeExpectancy = getLifeExpectancy(birthYear, sex);
 
-    // Introduce controlled variation based on name and DOB
+    // Introduce more randomness by combining name hash and DOB
     const variation = ((birthYear + nameValue) % 7) - ((birthDay + nameValue) % 3);
     const deathYear = birthYear + lifeExpectancy + variation;
-    // Ensure death month/day are within valid ranges
     const deathMonth = ((birthMonth * nameValue) % 12) + 1;
     const deathDay = ((birthDay + nameValue * 3) % 28) + 1;
 
@@ -43,10 +42,11 @@ function predictLife() {
         });
 }
 
+// Generate a numeric value from name for uniqueness
 function hashName(name) {
     let hash = 0;
     for (let i = 0; i < name.length; i++) {
-        hash = (hash * 31 + name.charCodeAt(i)) % 1000;
+        hash = (hash * 31 + name.charCodeAt(i)) % 1000; // Keep the number manageable
     }
     return hash;
 }
@@ -60,26 +60,20 @@ function getLifeExpectancy(birthYear, sex) {
     };
 
     const years = Object.keys(baseLifeExpectancy).map(Number).sort((a, b) => a - b);
-
-    // Handle years outside dataset range
-    if (birthYear <= years[0]) {
-        return baseLifeExpectancy[years[0]][sex];
-    }
-    if (birthYear >= years[years.length - 1]) {
-        return baseLifeExpectancy[years[years.length - 1]][sex];
-    }
-
-    // Find interpolation segment
     for (let i = 0; i < years.length - 1; i++) {
-        if (birthYear >= years[i] && birthYear < years[i + 1]) {
-            const start = baseLifeExpectancy[years[i]][sex];
-            const end = baseLifeExpectancy[years[i + 1]][sex];
-            const fraction = (birthYear - years[i]) / (years[i + 1] - years[i]);
-            return Math.round(start + (end - start) * fraction);
+        if (years[i] <= birthYear && birthYear < years[i + 1]) {
+            const maleStart = baseLifeExpectancy[years[i]].male;
+            const femaleStart = baseLifeExpectancy[years[i]].female;
+            const maleEnd = baseLifeExpectancy[years[i + 1]].male;
+            const femaleEnd = baseLifeExpectancy[years[i + 1]].female;
+            
+            const interpolatedMale = maleStart + ((birthYear - years[i]) / (years[i + 1] - years[i])) * (maleEnd - maleStart);
+            const interpolatedFemale = femaleStart + ((birthYear - years[i]) / (years[i + 1] - years[i])) * (femaleEnd - femaleStart);
+            
+            return sex === 'male' ? Math.round(interpolatedMale) : Math.round(interpolatedFemale);
         }
     }
-
-    return baseLifeExpectancy[years[years.length - 1]][sex]; // Fallback
+    return baseLifeExpectancy[years[years.length - 1]][sex];
 }
 
 async function fetchHistoricalFigures(day, month, year) {
@@ -103,14 +97,21 @@ async function fetchHistoricalFigures(day, month, year) {
 }
 
 function generateLifeComparison(figures) {
-    return figures.length 
-        ? `<ul>${figures.map(fig => `<li>${fig.name}: ${fig.lifespan} years</li>`).join('')}</ul>`
-        : "<p>No comparable historical figures found</p>";
+    let comparison = "<ul>";
+    figures.forEach(figure => {
+        comparison += `<li>${figure.name}: ${figure.lifespan} years lived</li>`;
+    });
+    comparison += "</ul>";
+    return comparison;
 }
 
 function generateLifeCode(year, month, day, nameValue) {
+    let code = [];
     const seed = ((year % 100) * month * day + nameValue) % 1000;
-    return Array.from({length: 5}, (_, i) => 
-        ((seed * (i + 1)) % 3 === 2) ? Math.round(Math.random()) : ((seed * (i + 1)) % 3)
-    ).join('');
+
+    for (let i = 0; i < 5; i++) {
+        const value = (seed * (i + 1)) % 3;
+        code.push(value === 2 ? Math.round(Math.random()) : value);
+    }
+    return code.join('');
 }
