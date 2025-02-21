@@ -53,7 +53,7 @@ function hashName(name) {
 
 function getLifeExpectancy(birthYear, sex) {
     const baseLifeExpectancy = {
-        1900: { male: 73, female: 78 },
+        1900: { male: 74, female: 79 },
         1950: { male: 71, female: 82 },
         2000: { male: 74, female: 79 },
         2050: { male: 71, female: 82 }
