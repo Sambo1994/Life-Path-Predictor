@@ -1,18 +1,27 @@
 function predictLife() {
     const name = document.getElementById('name').value.trim();
-    const dob = new Date(document.getElementById('dob').value);
+    const dobInput = document.getElementById('dob').value;
+    const dob = new Date(dobInput);
     const sex = document.getElementById('sex').value;
 
+    // Validate inputs
     if (!name || isNaN(dob.getTime())) {
         alert("Please enter a valid name and date of birth.");
         return;
     }
 
+    // Ensure the date of birth is not in the future
+    const today = new Date();
+    if (dob > today) {
+        alert("Date of birth cannot be in the future.");
+        return;
+    }
+
     const birthYear = dob.getFullYear();
-    const birthMonth = dob.getMonth() + 1;
+    const birthMonth = dob.getMonth() + 1; // Months are 0-indexed in JavaScript
     const birthDay = dob.getDate();
 
-    // Generate a numeric value from name for added uniqueness
+    // Generate a numeric value from the name for added uniqueness
     const nameValue = hashName(name);
 
     // Estimate lifespan based on historical life expectancy
@@ -39,10 +48,11 @@ function predictLife() {
         })
         .catch(error => {
             console.error('Error fetching historical figures:', error);
+            alert('An error occurred while fetching historical figures. Please try again.');
         });
 }
 
-// Generate a numeric value from name for uniqueness
+// Generate a numeric value from the name for uniqueness
 function hashName(name) {
     let hash = 0;
     for (let i = 0; i < name.length; i++) {
@@ -51,31 +61,33 @@ function hashName(name) {
     return hash;
 }
 
+// Get life expectancy based on birth year and sex
 function getLifeExpectancy(birthYear, sex) {
     const baseLifeExpectancy = {
-        1900: { male: 79, female: 79 },
-        1950: { male: 82, female: 82 },
-        2000: { male: 79, female: 79 },
-        2050: { male: 82, female: 82 }
+        1900: { male: 48, female: 51 },
+        1950: { male: 66, female: 71 },
+        2000: { male: 74, female: 79 },
+        2050: { male: 78, female: 82 }
     };
 
     const years = Object.keys(baseLifeExpectancy).map(Number).sort((a, b) => a - b);
+
+    // Find the closest year range for interpolation
     for (let i = 0; i < years.length - 1; i++) {
         if (years[i] <= birthYear && birthYear < years[i + 1]) {
-            const maleStart = baseLifeExpectancy[years[i]].male;
-            const femaleStart = baseLifeExpectancy[years[i]].female;
-            const maleEnd = baseLifeExpectancy[years[i + 1]].male;
-            const femaleEnd = baseLifeExpectancy[years[i + 1]].female;
-            
-            const interpolatedMale = maleStart + ((birthYear - years[i]) / (years[i + 1] - years[i])) * (maleEnd - maleStart);
-            const interpolatedFemale = femaleStart + ((birthYear - years[i]) / (years[i + 1] - years[i])) * (femaleEnd - femaleStart);
-            
-            return sex === 'male' ? Math.round(interpolatedMale) : Math.round(interpolatedFemale);
+            const startLifeExpectancy = baseLifeExpectancy[years[i]][sex];
+            const endLifeExpectancy = baseLifeExpectancy[years[i + 1]][sex];
+            const interpolationFactor = (birthYear - years[i]) / (years[i + 1] - years[i]);
+
+            return Math.round(startLifeExpectancy + interpolationFactor * (endLifeExpectancy - startLifeExpectancy));
         }
     }
+
+    // Default to the last available year if no range is found
     return baseLifeExpectancy[years[years.length - 1]][sex];
 }
 
+// Fetch historical figures born on the same date
 async function fetchHistoricalFigures(day, month, year) {
     try {
         const historicalFigures = [
@@ -89,14 +101,18 @@ async function fetchHistoricalFigures(day, month, year) {
             { name: "Mahatma Gandhi", lifespan: 78, born: 1869 },
         ];
 
+        // Filter figures born within 100 years of the input year
         return historicalFigures.filter(fig => Math.abs(fig.born - year) <= 100).slice(0, 5);
     } catch (error) {
         console.error('Error fetching historical figures:', error);
-        return [];
+        throw error; // Re-throw the error for handling in the calling function
     }
 }
 
+// Generate a comparison list of historical figures
 function generateLifeComparison(figures) {
+    if (figures.length === 0) return "<p>No historical figures found for comparison.</p>";
+
     let comparison = "<ul>";
     figures.forEach(figure => {
         comparison += `<li>${figure.name}: ${figure.lifespan} years lived</li>`;
@@ -105,6 +121,7 @@ function generateLifeComparison(figures) {
     return comparison;
 }
 
+// Generate a unique life code based on birth details and name
 function generateLifeCode(year, month, day, nameValue) {
     let code = [];
     const seed = ((year % 100) * month * day + nameValue) % 1000;
