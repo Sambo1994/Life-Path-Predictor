@@ -19,7 +19,7 @@ function predictLife() {
     const lifeExpectancy = getLifeExpectancy(birthYear, sex);
 
     // Introduce more randomness by combining name hash and DOB
-    const variation = ((birthYear + nameValue) % 7) - ((birthDay + nameValue) % 2);
+    const variation = ((birthYear + nameValue) % 6) - ((birthDay + nameValue) % 3);
     const deathYear = birthYear + lifeExpectancy + variation;
     const deathMonth = ((birthMonth * nameValue) % 12) + 1;
     const deathDay = ((birthDay + nameValue * 3) % 28) + 1;
