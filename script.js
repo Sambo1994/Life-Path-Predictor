@@ -69,10 +69,10 @@ function hashName(name) {
 // Function to get interpolated life expectancy
 function getLifeExpectancy(birthYear, sex) {
     const baseLifeExpectancy = {
-        1900: { male: 50, female: 52 },
-        1950: { male: 65, female: 70 },
-        2000: { male: 75, female: 80 },
-        2050: { male: 80, female: 85 }
+        1900: { male: 79, female: 79 },
+        1950: { male: 82, female: 82 },
+        2000: { male: 79, female: 79 },
+        2050: { male: 82, female: 82 }
     };
 
     const years = Object.keys(baseLifeExpectancy).map(Number).sort((a, b) => a - b);
