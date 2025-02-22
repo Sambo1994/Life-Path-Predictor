@@ -20,9 +20,11 @@ function predictLife() {
     const deathMonth = ((birthMonth * nameValue) % 12) + 1;
     const deathDay = ((birthDay + nameValue * 3) % 28) + 1;
 
-    const earlyDeathFactor = Math.random() * (0.80 - 0.60) + 0.60;
+    const earlyDeathFactor = Math.random() * (0.75 - 0.50) + 0.50;
     const earlyDeathAge = Math.floor(predictedLifespan * earlyDeathFactor);
     const earlyDeathYear = birthYear + earlyDeathAge;
+    const earlyDeathMonth = ((birthMonth * nameValue * 2) % 12) + 1;
+    const earlyDeathDay = ((birthDay + nameValue * 5) % 28) + 1;
 
     fetchHistoricalFigures(birthDay, birthMonth, birthYear)
         .then(figures => {
@@ -31,7 +33,7 @@ function predictLife() {
                 <h2>Life Prediction for ${name}</h2>
                 <p>Estimated Lifespan: ${predictedLifespan} years</p>
                 <p>Predicted Date of Passing: ${deathMonth}/${deathDay}/${deathYear}</p>
-                <p>Possible Early Death (Disease/Other Causes): ${earlyDeathYear}</p>
+                <p>Possible Early Death (Disease/Other Causes): ${earlyDeathMonth}/${earlyDeathDay}/${earlyDeathYear}</p>
                 <h3>Life Path Comparison</h3>
                 ${generateLifeComparison(figures)}
                 <p>Life Code: ${generateLifeCode(birthYear, birthMonth, birthDay, nameValue)}</p>
