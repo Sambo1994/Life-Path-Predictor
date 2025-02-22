@@ -21,7 +21,7 @@ function predictLife() {
     const deathDay = ((birthDay + nameValue * 3) % 28) + 1;
 
     // Deterministic early death calculation
-    const earlyDeathFactor = ((nameValue % 7) / 100) * (0.77 - 0.50) + 0.77;
+    const earlyDeathFactor = ((nameValue % 7) / 100) * (0.80 - 0.50) + 0.80;
     const earlyDeathAge = Math.floor(predictedLifespan * earlyDeathFactor);
     const earlyDeathDate = {
         year: birthYear + earlyDeathAge,
