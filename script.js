@@ -12,26 +12,26 @@ function predictLife() {
     const birthMonth = dob.getMonth() + 1;
     const birthDay = dob.getDate();
 
-    // Generate a numeric value from name for added uniqueness
     const nameValue = hashName(name);
-
-    // Estimate lifespan based on historical life expectancy
     const lifeExpectancy = getLifeExpectancy(birthYear, sex);
-
-    // Introduce more randomness by combining name hash and DOB
     const variation = ((birthYear + nameValue) % 7) - ((birthDay + nameValue) % 3);
-    const deathYear = birthYear + lifeExpectancy + variation;
+    const predictedLifespan = lifeExpectancy + variation;
+    const deathYear = birthYear + predictedLifespan;
     const deathMonth = ((birthMonth * nameValue) % 12) + 1;
     const deathDay = ((birthDay + nameValue * 3) % 28) + 1;
 
-    // Fetch historical figures born on the same date
+    const earlyDeathFactor = Math.random() * (0.75 - 0.50) + 0.50;
+    const earlyDeathAge = Math.floor(predictedLifespan * earlyDeathFactor);
+    const earlyDeathYear = birthYear + earlyDeathAge;
+
     fetchHistoricalFigures(birthDay, birthMonth, birthYear)
         .then(figures => {
             const resultDiv = document.getElementById('result');
             resultDiv.innerHTML = `
                 <h2>Life Prediction for ${name}</h2>
-                <p>Estimated Lifespan: ${lifeExpectancy + variation} years</p>
+                <p>Estimated Lifespan: ${predictedLifespan} years</p>
                 <p>Predicted Date of Passing: ${deathMonth}/${deathDay}/${deathYear}</p>
+                <p>Possible Early Death (Disease/Other Causes): ${earlyDeathYear}</p>
                 <h3>Life Path Comparison</h3>
                 ${generateLifeComparison(figures)}
                 <p>Life Code: ${generateLifeCode(birthYear, birthMonth, birthDay, nameValue)}</p>
@@ -42,11 +42,10 @@ function predictLife() {
         });
 }
 
-// Generate a numeric value from name for uniqueness
 function hashName(name) {
     let hash = 0;
     for (let i = 0; i < name.length; i++) {
-        hash = (hash * 31 + name.charCodeAt(i)) % 1000; // Keep the number manageable
+        hash = (hash * 31 + name.charCodeAt(i)) % 1000;
     }
     return hash;
 }
@@ -87,6 +86,11 @@ async function fetchHistoricalFigures(day, month, year) {
             { name: "Nikola Tesla", lifespan: 86, born: 1856 },
             { name: "Ada Lovelace", lifespan: 36, born: 1815 },
             { name: "Mahatma Gandhi", lifespan: 78, born: 1869 },
+            { name: "Emily Brontë", lifespan: 30, born: 1818 },
+            { name: "Franz Kafka", lifespan: 40, born: 1883 },
+            { name: "Sylvia Plath", lifespan: 30, born: 1932 },
+            { name: "James Dean", lifespan: 24, born: 1931 },
+            { name: "Jean-Michel Basquiat", lifespan: 27, born: 1960 }
         ];
 
         return historicalFigures.filter(fig => Math.abs(fig.born - year) <= 100).slice(0, 5);
