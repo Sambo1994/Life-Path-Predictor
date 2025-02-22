@@ -18,8 +18,8 @@ function predictLife() {
     // Estimate lifespan based on historical life expectancy
     const lifeExpectancy = getLifeExpectancy(birthYear, sex);
 
-    // Adjust the variation calculation to -10 to +10 range
-    const variation = ((birthYear + nameValue) % 21) - 10;
+    // Introduce more randomness by combining name hash and DOB
+    const variation = ((birthYear + nameValue) % 7) - ((birthDay + nameValue) % 3);
     const deathYear = birthYear + lifeExpectancy + variation;
     const deathMonth = ((birthMonth * nameValue) % 12) + 1;
     const deathDay = ((birthDay + nameValue * 3) % 28) + 1;
