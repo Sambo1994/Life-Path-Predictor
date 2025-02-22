@@ -20,7 +20,7 @@ function predictLife() {
     const deathMonth = ((birthMonth * nameValue) % 12) + 1;
     const deathDay = ((birthDay + nameValue * 3) % 28) + 1;
 
-    const earlyDeathFactor = Math.random() * (0.75 - 0.50) + 0.50;
+    const earlyDeathFactor = Math.random() * (0.80 - 0.60) + 0.60;
     const earlyDeathAge = Math.floor(predictedLifespan * earlyDeathFactor);
     const earlyDeathYear = birthYear + earlyDeathAge;
 
