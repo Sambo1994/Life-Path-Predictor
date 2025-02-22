@@ -20,11 +20,14 @@ function predictLife() {
     const deathMonth = ((birthMonth * nameValue) % 12) + 1;
     const deathDay = ((birthDay + nameValue * 3) % 28) + 1;
 
-    const earlyDeathFactor = Math.random() * (0.75 - 0.50) + 0.50;
+    // Deterministic early death calculation
+    const earlyDeathFactor = ((nameValue % 26) / 100) * (0.75 - 0.50) + 0.50;
     const earlyDeathAge = Math.floor(predictedLifespan * earlyDeathFactor);
-    const earlyDeathYear = birthYear + earlyDeathAge;
-    const earlyDeathMonth = ((birthMonth * nameValue * 2) % 12) + 1;
-    const earlyDeathDay = ((birthDay + nameValue * 5) % 28) + 1;
+    const earlyDeathDate = {
+        year: birthYear + earlyDeathAge,
+        month: ((birthMonth * nameValue * 2) % 12) + 1,
+        day: ((birthDay + nameValue * 5) % 28) + 1
+    };
 
     fetchHistoricalFigures(birthDay, birthMonth, birthYear)
         .then(figures => {
@@ -33,7 +36,7 @@ function predictLife() {
                 <h2>Life Prediction for ${name}</h2>
                 <p>Estimated Lifespan: ${predictedLifespan} years</p>
                 <p>Predicted Date of Passing: ${deathMonth}/${deathDay}/${deathYear}</p>
-                <p>Possible Early Death (Disease/Other Causes): ${earlyDeathMonth}/${earlyDeathDay}/${earlyDeathYear}</p>
+                <p>Possible Early Death (Disease/Other Causes): ${earlyDeathDate.month}/${earlyDeathDate.day}/${earlyDeathDate.year}</p>
                 <h3>Life Path Comparison</h3>
                 ${generateLifeComparison(figures)}
                 <p>Life Code: ${generateLifeCode(birthYear, birthMonth, birthDay, nameValue)}</p>
@@ -87,14 +90,8 @@ async function fetchHistoricalFigures(day, month, year) {
             { name: "Isaac Newton", lifespan: 84, born: 1643 },
             { name: "Nikola Tesla", lifespan: 86, born: 1856 },
             { name: "Ada Lovelace", lifespan: 36, born: 1815 },
-            { name: "Mahatma Gandhi", lifespan: 78, born: 1869 },
-            { name: "Emily Brontë", lifespan: 30, born: 1818 },
-            { name: "Franz Kafka", lifespan: 40, born: 1883 },
-            { name: "Sylvia Plath", lifespan: 30, born: 1932 },
-            { name: "James Dean", lifespan: 24, born: 1931 },
-            { name: "Jean-Michel Basquiat", lifespan: 27, born: 1960 }
+            { name: "Mahatma Gandhi", lifespan: 78, born: 1869 }
         ];
-
         return historicalFigures.filter(fig => Math.abs(fig.born - year) <= 100).slice(0, 5);
     } catch (error) {
         console.error('Error fetching historical figures:', error);
@@ -114,7 +111,6 @@ function generateLifeComparison(figures) {
 function generateLifeCode(year, month, day, nameValue) {
     let code = [];
     const seed = ((year % 100) * month * day + nameValue) % 1000;
-
     for (let i = 0; i < 5; i++) {
         const value = (seed * (i + 1)) % 3;
         code.push(value === 2 ? Math.round(Math.random()) : value);
